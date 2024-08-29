@@ -112,9 +112,9 @@ const deleteListing  = async (req, res) =>{
 const deleteImage = async(req, res) => {
     try{
         const listId = req.params.id;
-        const imageName = req.body;
-        
-        //Checking the data for updation is available or not.
+        const imageName = req.body.image;
+        console.log(imageName);
+        //Checking the data for updating is available or not.
         if(!listId) return res.status(400).json({ status:'error', message: "List id is null" });
         if(!imageName) return res.status(400).json({ status:'error', message: "Image name is not in req body" });
 
@@ -136,17 +136,18 @@ const deleteImage = async(req, res) => {
 const updateImage = async(req, res) =>{
     try{
         const listId = req.params.id;
+        console.log(listId);
 
-        //Checking the data for updation is available or not.
+        //Checking the data for updating is available or not.
         if(!listId) return res.status(400).json({ status:'error', message: "List id is null" });
         if(!req.files) return res.status(400).json({ status:'error', message: "No files found." });
 
         //store the image names to array
         const imageArray = req.files.map( element => element.filename );
-    
+        console.log(imageArray);
         const updatedList = await Listing.findOneAndUpdate({ _id: listId}, { $addToSet: { images: { $each: imageArray}}}, { new: true});
        
-        // If the above update request returns emply then document is not found.
+        // If the above update request returns empty then document is not found.
         if(!updatedList) return res.status(404).json({status:"error", message:"document not found."});
 
         return res.status(200).json({ status:"success", message:"Image successfully deleted."});
