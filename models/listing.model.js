@@ -10,7 +10,7 @@ const listingSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    businessPhone: {
+    phone: {
         type: Number,
         required: true,
     },

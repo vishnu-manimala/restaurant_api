@@ -47,7 +47,7 @@ const createListing = async (req, res) =>{
         const list = new Listing({
             ownerId: userId,
             name:listData.name,
-            businessPhone:listData.phone,
+            phone:listData.phone,
             images: imageArray,
             street : listData.street,
             city: listData.city,
@@ -67,14 +67,33 @@ const createListing = async (req, res) =>{
 }
 
 const updateListing = async (req, res) =>{
-    
+    try{
+
+        //Checks for list id send as param.
+        const listId = req.params.id;
+        if(!listId) return res.status(400).json({ status:'error', message: "List id is null" });
+
+        //checks for data to be updates send as body.
+        const data = req.body
+        if(!data) return res.status(400).json({ status:'error', message: "Nothing to update" });
+
+        //updates collection with the data. it will return null if it cant find the document with the id.
+        const updatedList = await Listing.findOneAndUpdate({ _id: listId}, data,{ new: true});
+        if(!updatedList)  return res.status(404).json({status:"error", message:"document not found."});
+
+        return res.status(200).json({status:"success", message:"updated successfully", updatedList:updatedList})
+
+    }catch(err){
+        console.log(err.message);
+        res.status(500).json({ status:'error', message: ' Internal server error' })
+    }
 }
 
 
 const deleteListing  = async (req, res) =>{
     try{
         const listId = req.params.id;
-        if(!listId) return res.status(400).json({ status:'error', message: "Request body is empty" });
+        if(!listId) return res.status(400).json({ status:'error', message: "List id is null" });
 
         //Instead of deleting the file here it soft deletes the data.
         const deletedList = await Listing.findOneAndUpdate({_id:listId}, {$set:{isDeleted:true}}, {new: true});
@@ -90,11 +109,20 @@ const deleteListing  = async (req, res) =>{
     }
 }
 
+const deleteImage = async(req, res) => {
+    
+}
+
+const addImage = async(req, res) =>{
+
+}
+
 module.exports = {
     listRestaurants,
     singleRestaurant,
     createListing,
     updateListing,
-    deleteListing
-
+    deleteListing,
+    deleteImage,
+    addImage,
 }
