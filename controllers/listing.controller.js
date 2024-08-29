@@ -43,7 +43,7 @@ const createListing = async (req, res) =>{
         const listData = req.body;
         const userId = req.userId;
         const imageArray = req.files.map(element => element.filename);
-
+        
         const list = new Listing({
             ownerId: userId,
             name:listData.name,
