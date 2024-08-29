@@ -39,7 +39,7 @@ const register = async( req, res ) =>{
     }
 }
 
-const login = async(req, res) => {
+const login = async (req, res) => {
     try{
         //Checks if body has data
         if(!req.body){
@@ -63,8 +63,28 @@ const login = async(req, res) => {
         await user.save();
 
         return res.status(200).json({status:"success", message:"Succesfully logged in.", accessToken:accessToken, refreshToken: refreshToken, user: user })
-        
+
     }catch(err){
+        console.log(err.message);
+        return res.status(500).json({ status:"error", message:"Internal server error"});
+    }
+}
+
+const refreshTokenVerification = async (req, res) => {
+    try{
+        const { refreshToken } = req.body;
+        if(!refreshToken) return res.status(400).json({ status:'error', message: "Request body is empty" });
+
+        const decode = await jwtHelper.verifyToken(refreshToken);
+        if(!decode) return res.status(401).json({ staus:"error", message:"invalid refresh token, login again."})
+
+        const user = await User.findOne({_id:decode._id});
+        if(!user || user.refreshToken !== refreshToken) return res.status(401).json({ staus:"error", message:"invalid refresh token, login again."})
+
+        const accessToken = await jwtHelper.tokenGenerator(user,"1d");
+        return res.status(200).json({ status:"success", message:"New access token generated", accessToken: accessToken });
+
+    } catch(err){
         console.log(err.message);
         return res.status(500).json({ status:"error", message:"Internal server error"});
     }
@@ -72,5 +92,6 @@ const login = async(req, res) => {
 
 module.exports = {
     register,
-    login
+    login,
+    refreshTokenVerification
 };
