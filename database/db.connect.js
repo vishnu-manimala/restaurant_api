@@ -1,8 +1,9 @@
 const mongoose = require('mongoose');
 
 module.exports = async(req, res)=>{
+
     try{
-        await mongoose.connect('mongodb://localhost:27017/restaurent',{
+        await mongoose.connect( process.env.MONGO_DB_URL,{
             useNewUrlParser: true,
             useUnifiedTopology: true,
         }).then(()=>{
@@ -13,4 +14,5 @@ module.exports = async(req, res)=>{
     } catch(err){
         console.log(err.message);
     }
+    
 }

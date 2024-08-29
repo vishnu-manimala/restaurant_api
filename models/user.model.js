@@ -11,11 +11,6 @@ const userSchema = new mongoose.Schema({
         required: true,
         unique: true,
     },
-    contactNumber: {
-        type: Number,
-        required: true,
-        unique: true,
-    },
     password: {
         type: String,
         required: true,
@@ -24,6 +19,9 @@ const userSchema = new mongoose.Schema({
         type:String,
         required: true,
         enum: [ 'BusinessOwner', 'User', 'Admin' ]
+    },
+    refreshToken: {
+        type:String
     }
 
 });

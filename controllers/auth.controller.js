@@ -1,6 +1,6 @@
 const User = require( '../models/user.model' );
-const helper = require( '../utils/helper');
-
+const helper = require( '../utils/password.helper');
+const jwtHelper = require('../utils/jwt.helper');
 
 const register = async( req, res ) =>{
 
@@ -29,7 +29,7 @@ const register = async( req, res ) =>{
             role:role
         })
 
-        await newUser().save();
+        await newUser.save();
 
         res.status(201).json({ status:'success', message: ' User registered successfully'});
 
@@ -39,7 +39,38 @@ const register = async( req, res ) =>{
     }
 }
 
+const login = async(req, res) => {
+    try{
+        //Checks if body has data
+        if(!req.body){
+            return res.status(400)
+                    .json({ status:'error', message: "Request body is empty" });
+        }
+
+        const { email, password } = req.body;
+
+        const user  = await User.findOne({email});
+        if(!user) return res.status(404).json({ status:"error", message:"User doesn't exists"});
+
+        const isPasswordMatch = helper.matchPassword(password, user.password);
+
+        if(!isPasswordMatch) return res.status(401).json({ status: "error", message: "Invalid username or password" });
+
+        const accessToken = await jwtHelper.tokenGenerator(user,"1d");
+        const refreshToken = await jwtHelper.tokenGenerator(user,"15d");
+
+        user.refreshToken = refreshToken;
+        await user.save();
+
+        return res.status(200).json({status:"success", message:"Succesfully logged in.", accessToken:accessToken, refreshToken: refreshToken, user: user })
+        
+    }catch(err){
+        console.log(err.message);
+        return res.status(500).json({ status:"error", message:"Internal server error"});
+    }
+}
 
 module.exports = {
     register,
+    login
 };
