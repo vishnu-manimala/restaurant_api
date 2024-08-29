@@ -8,8 +8,7 @@ const register = async( req, res ) =>{
 
         //Checks if body has data
         if(!req.body){
-            return res.status(400)
-                      .json({ status:'error', message: "Request body is empty" });
+            return res.status(400).json({ status:'error', message: "Request body is empty" });
         }
 
         //Destructuring data form req.body
@@ -78,13 +77,14 @@ const refreshTokenVerification = async (req, res) => {
         //Checks req body have enough data to proceed
         const { refreshToken } = req.body;
         if(!refreshToken) return res.status(400).json({ status:'error', message: "Request body is empty" });
-
+        console.log(refreshToken)
         //decodes refresh token to get user data- verifying
         const decode = await jwtHelper.verifyToken(refreshToken);
+        console.log("decode",decode)
         if(!decode) return res.status(401).json({ status:"error", message:"invalid refresh token, login again."})
 
         //gets data from user db and validates refresh token
-        const user = await User.findOne({_id:decode._id});
+        const user = await User.findOne({_id:decode.data._id});
         if(!user || user.refreshToken !== refreshToken) return res.status(401).json({ status:"error", message:"invalid refresh token, login again."})
 
         //generates new access token and sends back to client

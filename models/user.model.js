@@ -22,6 +22,10 @@ const userSchema = new mongoose.Schema({
     },
     refreshToken: {
         type:String
+    },
+    createdAt:{
+        type: Date,
+        default: Date.now()
     }
 
 });

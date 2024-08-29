@@ -12,15 +12,39 @@ const listingSchema = new mongoose.Schema({
     },
     businessPhone: {
         type: Number,
+        required: true,
     },
-    imgaes: [],
-    addres: {
-        street : String,
-        city: String,
-        state: String,
-        zipCode : Number,
-        country: String
+    images: [],
+    
+    street : {
+        type: String,
+        required: true,
+    },
+    city:{
+        type: String,
+        required: true,
+    },
+    state: {
+        type: String,
+        required: true,
+    },
+    zipCode : {
+        type: String,
+        required: true,
+    },
+    country: {
+        type: String,
+        required: true,
+    },
+    isDeleted:{
+        type:Boolean,
+        default: false
+    },
+    createdAt:{
+        type: Date,
+        default: Date.now()
     }
+    
 });
 
 module.exports = mongoose.model( 'listing', listingSchema);

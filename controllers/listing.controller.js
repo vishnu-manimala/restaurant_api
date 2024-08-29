@@ -1,0 +1,100 @@
+const Listing = require('../models/listing.model');
+
+const listRestaurants = async (req, res) =>{
+    try{
+        const ListingDatas = await Listing.find({ isDeleted:false });
+        console.log("list",ListingDatas)
+        if(!ListingDatas) return res.status(404).json({ status:'error', message: "No data found" }); 
+
+        return res.status(200).json({status:"success", message:"Data found", data: ListingDatas });
+
+    }catch(err){
+        console.log(err.message);
+        res.status(500).json({ status:'error', message: ' Internal server error' })
+  
+    }
+}
+
+const singleRestaurant = async (req, res)=>{
+    try{
+
+    //Checks if the listing Id is available in params or not
+     const listId = req.params.id;
+     if(!listId) return res.status(400).json({ status:'error', message: "List id not found" }); 
+     
+     //retrieving list form db 
+     const listData = await Listing.findOne({ _id: listId , isDeleted: false })
+     if(!listData) return res.status(404).json({ status:'error', message: "List not found" }); 
+     
+     return res.status(200).json({ status: "success", message:"List found", list:listData});
+
+    }catch(err){
+        console.log(err.message);
+        res.status(500).json({ status:'error', message: ' Internal server error' })
+    }
+}
+
+const createListing = async (req, res) =>{
+    try{
+        if(!req.body) return res.status(400).json({ status:'error', message: "Request body is empty" });
+        if(!req.files) return res.status(400).json({ status:'error', message: "No files found" });
+        console.log(req.body);
+
+        const listData = req.body;
+        const userId = req.userId;
+        const imageArray = req.files.map(element => element.filename);
+
+        const list = new Listing({
+            ownerId: userId,
+            name:listData.name,
+            businessPhone:listData.phone,
+            images: imageArray,
+            street : listData.street,
+            city: listData.city,
+            state: listData.state,
+            zipCode : listData.zipCode,
+            country: listData.country
+        })
+
+        await list.save();
+
+        res.status(201).json({ status:'success', message: ' Listing created successfully'});
+
+    }catch(err){
+        console.log(err.message);
+        res.status(500).json({ status:'error', message: err.message })
+    }
+}
+
+const updateListing = async (req, res) =>{
+    
+}
+
+
+const deleteListing  = async (req, res) =>{
+    try{
+        const listId = req.params.id;
+        if(!listId) return res.status(400).json({ status:'error', message: "Request body is empty" });
+
+        //Instead of deleting the file here it soft deletes the data.
+        const deletedList = await Listing.findOneAndUpdate({_id:listId}, {$set:{isDeleted:true}}, {new: true});
+        
+        //checks if the list to be deleted is found or not
+        if(!deletedList) return res.status(404).json({status:"error", message:"document not found."});
+
+        return res.status(200).json({ status:"success", message:"List successfully deleted."});
+
+    }catch(err){
+        console.log(err.message);
+        res.status(500).json({ status:'error', message: ' Internal server error' })
+    }
+}
+
+module.exports = {
+    listRestaurants,
+    singleRestaurant,
+    createListing,
+    updateListing,
+    deleteListing
+
+}

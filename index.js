@@ -13,8 +13,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 const authRoutes = require( './routes/auth.route');
+const listingRoutes = require('./routes/listing.route');
 
 app.use( '/api/auth', authRoutes); // For authentication and authorization requests.
+app.use( '/api/listing', listingRoutes); // For listing related requests.
 
 // app.get('/', ( req,res ) =>{
 //     res.send("hi");
