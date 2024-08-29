@@ -24,6 +24,8 @@ listingRouter.get('/list/:id', listingController.singleRestaurant);
 listingRouter.post('/create', authMiddleware.isAuthorized, roleMiddleware.isNotUser, upload.array('files'),listingController.createListing);
 listingRouter.patch('/update/:id', authMiddleware.isAuthorized, roleMiddleware.isNotUser, listingController.updateListing);
 listingRouter.delete('/delete/:id', authMiddleware.isAuthorized, roleMiddleware.isAdmin, listingController.deleteListing);
+listingRouter.patch('/updateImage/:id', authMiddleware.isAuthorized, roleMiddleware.isNotUser, upload.array('files'), listingController.updateImage);
+listingRouter.delete('/deleteImage/:id', authMiddleware.isAuthorized, roleMiddleware.isAdmin, listingController.deleteImage);
 
 
 module.exports = listingRouter;
