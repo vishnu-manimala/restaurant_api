@@ -3,6 +3,7 @@ const listingRouter = express.Router();
 const multer = require('multer');
 
 const authMiddleware = require('../middlewares/auth.middleware');
+const roleMiddleware =  require('../middlewares/role.middleware');
 const listingController = require('../controllers/listing.controller');
 
 // listingRouter.use( authMiddleware );
@@ -18,11 +19,11 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-listingRouter.post('/create',upload.array('files'),listingController.createListing);
-listingRouter.get('/lists',listingController.listRestaurants);
-listingRouter.get('/list/:id',listingController.singleRestaurant);
-listingRouter.patch('/update/:id',listingController.updateListing);
-listingRouter.delete('/delete/:id',listingController.deleteListing);
+listingRouter.get('/lists', listingController.listRestaurants);
+listingRouter.get('/list/:id', listingController.singleRestaurant);
+listingRouter.post('/create', authMiddleware.isAuthorized, roleMiddleware.isNotUser, upload.array('files'),listingController.createListing);
+listingRouter.patch('/update/:id', authMiddleware.isAuthorized, roleMiddleware.isNotUser, listingController.updateListing);
+listingRouter.delete('/delete/:id', authMiddleware.isAuthorized, roleMiddleware.isAdmin, listingController.deleteListing);
 
 
 module.exports = listingRouter;
