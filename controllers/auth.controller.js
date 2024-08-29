@@ -49,20 +49,23 @@ const login = async (req, res) => {
 
         const { email, password } = req.body;
 
+        //Checks for existence of user
         const user  = await User.findOne({email});
         if(!user) return res.status(404).json({ status:"error", message:"User doesn't exists"});
 
+        //checks password matching
         const isPasswordMatch = helper.matchPassword(password, user.password);
-
         if(!isPasswordMatch) return res.status(401).json({ status: "error", message: "Invalid username or password" });
 
+        //Generating Tokens
         const accessToken = await jwtHelper.tokenGenerator(user,"1d");
         const refreshToken = await jwtHelper.tokenGenerator(user,"15d");
 
+        //Saves refresh token in db
         user.refreshToken = refreshToken;
         await user.save();
 
-        return res.status(200).json({status:"success", message:"Succesfully logged in.", accessToken:accessToken, refreshToken: refreshToken, user: user })
+        return res.status(200).json({status:"success", message:"Successfully logged in.", accessToken:accessToken, refreshToken: refreshToken, user: user })
 
     }catch(err){
         console.log(err.message);
@@ -72,15 +75,19 @@ const login = async (req, res) => {
 
 const refreshTokenVerification = async (req, res) => {
     try{
+        //Checks req body have enough data to proceed
         const { refreshToken } = req.body;
         if(!refreshToken) return res.status(400).json({ status:'error', message: "Request body is empty" });
 
+        //decodes refresh token to get user data- verifying
         const decode = await jwtHelper.verifyToken(refreshToken);
-        if(!decode) return res.status(401).json({ staus:"error", message:"invalid refresh token, login again."})
+        if(!decode) return res.status(401).json({ status:"error", message:"invalid refresh token, login again."})
 
+        //gets data from user db and validates refresh token
         const user = await User.findOne({_id:decode._id});
-        if(!user || user.refreshToken !== refreshToken) return res.status(401).json({ staus:"error", message:"invalid refresh token, login again."})
+        if(!user || user.refreshToken !== refreshToken) return res.status(401).json({ status:"error", message:"invalid refresh token, login again."})
 
+        //generates new access token and sends back to client
         const accessToken = await jwtHelper.tokenGenerator(user,"1d");
         return res.status(200).json({ status:"success", message:"New access token generated", accessToken: accessToken });
 
