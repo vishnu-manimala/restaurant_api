@@ -74,6 +74,7 @@ const login = async (req, res) => {
 
 const refreshTokenVerification = async (req, res) => {
     try{
+        
         //Checks req body have enough data to proceed
         const { refreshToken } = req.body;
         if(!refreshToken) return res.status(400).json({ status:'error', message: "Request body is empty" });

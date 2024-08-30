@@ -10,10 +10,11 @@ const isAuthorized = async( req, res, next ) => {
     //verify jwt token
     const decode = await jwtHelper.verifyToken(token);
     if(!decode) return res.status(401).json({status:"Unauthorized access", message:"Token expired"});
-
+    console.log(decode);
     req.role = decode.data.role;// adding user role to req object;
     req.userId = decode.data._id;// adding user id to req object;
-    
+    req.userName = decode.data.name;
+    req.userEmail = decode.data.email;
     next();
 
 }

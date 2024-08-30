@@ -30,6 +30,12 @@ const reviewSchema = new mongoose.Schema({
             type: mongoose.Schema.Types.ObjectId,
             ref: userModel,
           },
+          userEmail:{
+            type: String,
+          },
+          userName:{
+            type: String,
+          },
           message: {
             type: String,
           },

@@ -1,22 +1,23 @@
+const mongoose = require('mongoose');
 const Review = require('../models/review.model');
 
 const listReview = async(req, res) =>{
     try{
         const listingId = req.params.id;
         if(!listingId) return res.status(400).json({ status:'error', message: "List id is empty" });
-
+        console.log(listingId)
         //Retrieving reviews and replays along with the user data
         const reviews = await Review.aggregate([
-            { $match: { _id: listingId }},
+            { $match: { listingId: new mongoose.Types.ObjectId(listingId) }},
             {
                 $lookup:{
-                    from:'user',
+                    from:'users',
                     localField:'userId',
                     foreignField:'_id',
                     as: 'user'
                 }
             },
-            { $unwind: '$user' },
+            { $unwind: '$user' },           
             { 
                 $project:{
                     _id: 1,
@@ -28,22 +29,10 @@ const listReview = async(req, res) =>{
                         name: 1,
                         email: 1
                     },
-                    replies:{
-                        $map:{
-                            input:'$reply',
-                            as: 'reply',
-                            v: {
-                                $lookup: {
-                                    form: 'user',
-                                    localField: 'userId',
-                                    foreignField: '_id',
-                                    as: 'replyUser'
-                                }
-                            }
-                        }
-                    }
+                   reply:1
                 }
-            }
+            },
+            
         ]);
 
         if(!reviews) return res.status(404).json({status:"error", message:"document not found."});
@@ -96,7 +85,7 @@ const deleteReview = async(req, res) =>{
         const deletedReview =  await Review.findOneAndDelete({ _id: reviewId });
 
         //If above query cant find the review using id then it will return null-checking for that case.
-        if(!deleteReview) return res.status(404).json({status:"error", message:"document not found."});
+        if(!deletedReview) return res.status(404).json({status:"error", message:"document not found."});
 
         res.status(200).json({ status:'success', message: 'Comment deleted successfully'});
 
@@ -141,10 +130,10 @@ const addReply = async(req, res) =>{
         if(!reviewId) return res.status(400).json({ status:'error', message: "Review id is empty" });
 
         const message =  req.body.reply;
-        if(!data) return res.status(400).json({ status:'error', message: "Update data is empty" });
+        if(!message) return res.status(400).json({ status:'error', message: "Update data is empty" });
 
-        const replyData = { userId: req.userId, message: message };
-        const savedReply = Review.findOneAndUpdate({ _id: reviewId }, { $push: { reply: replyData}}, { new: true });
+        const replyData = { userId: req.userId, userEmail:req.userEmail, userName:req.userName, message: message };
+        const savedReply = await Review.findOneAndUpdate({ _id: reviewId }, { $push: { reply: replyData}}, { new: true });
 
         if(!savedReply) return res.status(404).json({status:"error", message:"document not found."});
 
@@ -160,7 +149,7 @@ const addReply = async(req, res) =>{
 const deleteReply = async(req, res) => {
     try{
         const reviewId = req.params.id;
-        const replyId  = req.body.id;
+        const replyId  = req.body.replyId;
         if(!reviewId) return res.status(400).json({ status:'error', message: "Review id is required!" });
         if(!replyId) return res.status(400).json({ status:'error', message: "Reply id is required!" });
 
