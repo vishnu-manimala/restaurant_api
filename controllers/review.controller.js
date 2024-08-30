@@ -4,7 +4,7 @@ const Review = require('../models/review.model');
 const listReview = async(req, res) =>{
     try{
         const listingId = req.params.id;
-        if(!listingId) return res.status(400).json({ status:'error', message: "List id is empty" });
+        if(!listingId) return res.status(400).json({ status:'error', message: "Review id required" });
         console.log(listingId)
         //Retrieving reviews and replays along with the user data
         const reviews = await Review.aggregate([
@@ -38,7 +38,7 @@ const listReview = async(req, res) =>{
         if(!reviews) return res.status(404).json({status:"error", message:"document not found."});
             
         console.log("reviews>>",reviews)
-        return res.status(201).json({ status:'success', message: ' data fetched successfully', reviews: reviews});
+        return res.status(200).json({ status:'success', message: ' data fetched successfully', reviews: reviews});
 
     }catch(err){
         console.log(err.message);
@@ -51,8 +51,8 @@ const createReview = async(req, res) => {
         const listingId = req.params.id;
 
         // Checking for comment data and id of the business the will be added.
-        if(!listingId) return res.status(400).json({ status:'error', message: "List id is empty" });
-        if(!req.body) return res.status(400).json({ status:'error', message: "Request body is empty" });
+        if(!listingId) return res.status(400).json({ status:'error', message: "List id is not found." });
+        if(!req.body) return res.status(400).json({ status:'error', message: "Request body is empty." });
 
         const { rating, comment } = req.body;// destructuring comment data
 
@@ -130,14 +130,14 @@ const addReply = async(req, res) =>{
         if(!reviewId) return res.status(400).json({ status:'error', message: "Review id is empty" });
 
         const message =  req.body.reply;
-        if(!message) return res.status(400).json({ status:'error', message: "Update data is empty" });
+        if(!message) return res.status(400).json({ status:'error', message: "Reply data is empty" });
 
         const replyData = { userId: req.userId, userEmail:req.userEmail, userName:req.userName, message: message };
         const savedReply = await Review.findOneAndUpdate({ _id: reviewId }, { $push: { reply: replyData}}, { new: true });
 
         if(!savedReply) return res.status(404).json({status:"error", message:"document not found."});
 
-        return res.status(200).json({status:"success", message:"updated successfully", review:savedReply });
+        return res.status(201).json({status:"success", message:"Reply saved successfully", review:savedReply });
 
     }catch(err){
         console.log(err.message);

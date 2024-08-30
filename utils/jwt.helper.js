@@ -6,7 +6,11 @@ const tokenGenerator = async(data,expiry) => {
 }
 
 const verifyToken = async(token) =>{
-    return await jwt.verify(token, PRIVATE_KEY);
+    return await jwt.verify(token, PRIVATE_KEY, (err, decode)=>{
+      if(err) return 0;
+
+      return decode;
+    });
 }
 
 module.exports = {
