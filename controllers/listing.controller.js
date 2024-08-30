@@ -1,10 +1,68 @@
+const mongoose = require('mongoose');
 const Listing = require('../models/listing.model');
 
 const listRestaurants = async (req, res) =>{
     try{
-        const ListingDatas = await Listing.find({ isDeleted:false }).populate('ownerId','name email');
-        console.log("list",ListingDatas)
-        if(!ListingDatas) return res.status(404).json({ status:'error', message: "No data found" }); 
+        // Aggregating to get listing data with listed user and review, it also includes average review and total reviews
+        const ListingDatas = await Listing.aggregate([
+            {
+                $match: { isDeleted: false },
+            },
+            {
+                $lookup:{
+                    from: 'users',
+                    localField: 'ownerId',
+                    foreignField: '_id',
+                    as: 'owner',
+                },
+            },
+            { $unwind: '$owner'},
+            {
+                $lookup: {
+                    from: 'reviews',
+                    localField:'_id',
+                    foreignField: 'listingId',
+                    as: 'reviews',
+                },
+            },
+            {
+                $addFields:{
+                    averageRating: {
+                        $avg: '$reviews.rating',
+                    },
+                    totalReviews:{
+                        $size: '$reviews',
+                    }
+                }
+            },
+            {
+                $project: {
+                    _id: 1,
+                    name: 1,
+                    phone: 1,
+                    images: 1,
+                    street: 1,
+                    city: 1,
+                    state: 1,
+                    zipCode: 1,
+                    country: 1,
+                    isDeleted: 1,
+                    createdAt: 1,
+                    owner: {
+                        _id: 1,
+                        name: 1,
+                        email: 1,
+                        role: 1,
+                    },
+                    reviews: 1,
+                    averageRating: 1,
+                    totalReviews: 1,
+                }
+            }
+        ]);
+
+        console.log("list", ListingDatas)
+        if(ListingDatas.length === 0) return res.status(404).json({ status:'error', message: "No data found" }); 
 
         return res.status(200).json({status:"success", message:"Data found", data: ListingDatas });
 
@@ -23,9 +81,70 @@ const singleRestaurant = async (req, res)=>{
      if(!listId) return res.status(400).json({ status:'error', message: "List id not found" }); 
      
      //retrieving list form db 
-     const listData = await Listing.findOne({ _id: listId , isDeleted: false })
-     if(!listData) return res.status(404).json({ status:'error', message: "List not found" }); 
-     
+    const listData = await Listing.aggregate([
+        {
+            $match: {
+                $and:[
+                    { _id:new mongoose.Types.ObjectId(listId)}, 
+                    {isDeleted: false }
+                ],
+            },
+        },
+        {
+            $lookup:{
+                from: 'users',
+                localField: 'ownerId',
+                foreignField: '_id',
+                as: 'owner',
+            },
+        },
+        { $unwind: '$owner'},
+        {
+            $lookup: {
+                from: 'reviews',
+                localField:'_id',
+                foreignField: 'listingId',
+                as: 'reviews',
+            },
+        },
+        {
+            $addFields:{
+                averageRating: {
+                    $avg: '$reviews.rating',
+                },
+                totalReviews:{
+                    $size: '$reviews',
+                }
+            }
+        },
+        {
+            $project: {
+                _id: 1,
+                name: 1,
+                phone: 1,
+                images: 1,
+                street: 1,
+                city: 1,
+                state: 1,
+                zipCode: 1,
+                country: 1,
+                isDeleted: 1,
+                createdAt: 1,
+                owner: {
+                    _id: 1,
+                    name: 1,
+                    email: 1,
+                    role: 1,
+                },
+                reviews: 1,
+                averageRating: 1,
+                totalReviews: 1,
+            }
+        }
+    ]);
+
+     if(listData.length === 0) return res.status(404).json({ status:'error', message: "List not found" }); 
+     console.log(listData)
      return res.status(200).json({ status: "success", message:"List found", list:listData});
 
     }catch(err){
