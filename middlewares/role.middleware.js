@@ -5,9 +5,9 @@ const isAdmin = async (req, res, next ) =>{
    next();
 }
 
-const isBusinessOwner = async (req, res, next ) =>{
+const isNotBusinessOwner = async (req, res, next ) =>{
     const role = req.role;
-    if(role !== 'BusinessOwner') return res.status(403).json({ status:"Forbidden", message: "route is forbidden" });
+    if(role === 'BusinessOwner') return res.status(403).json({ status:"Forbidden", message: "route is forbidden" });
  
     next();
  }
@@ -21,6 +21,6 @@ const isBusinessOwner = async (req, res, next ) =>{
 
 module.exports = {
    isAdmin,
-   isBusinessOwner,
+   isNotBusinessOwner,
    isNotUser
 }

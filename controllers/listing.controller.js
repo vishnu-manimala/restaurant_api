@@ -2,7 +2,7 @@ const Listing = require('../models/listing.model');
 
 const listRestaurants = async (req, res) =>{
     try{
-        const ListingDatas = await Listing.find({ isDeleted:false });
+        const ListingDatas = await Listing.find({ isDeleted:false }).populate('ownerId','name email');
         console.log("list",ListingDatas)
         if(!ListingDatas) return res.status(404).json({ status:'error', message: "No data found" }); 
 
