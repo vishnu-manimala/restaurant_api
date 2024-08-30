@@ -177,7 +177,7 @@ const createListing = async (req, res) =>{
 
         await list.save();
 
-        res.status(201).json({ status:'success', message: ' Listing created successfully'});
+        res.status(201).json({ status:'success', message: 'Restaurant added successfully'});
 
     }catch(err){
         console.log(err.message);

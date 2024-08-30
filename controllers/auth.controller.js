@@ -16,7 +16,7 @@ const register = async( req, res ) =>{
         
         // Checking if the user already exists
         const existingUser = await User.findOne({ email: email});
-        if(existingUser) return res.status(400).json({ status:'error', message: "user already exists" });
+        if(existingUser) return res.status(409).json({ status:'error', message: "user already exists" });
 
         const securePassword = await helper.encryptPassword(password);
 
@@ -30,7 +30,7 @@ const register = async( req, res ) =>{
 
         await newUser.save();
 
-        res.status(201).json({ status:'success', message: ' User registered successfully'});
+        res.status(201).json({ status:'success', message: 'User registered successfully'});
 
     }catch(err){
         console.log(err.message);
@@ -50,7 +50,7 @@ const login = async (req, res) => {
 
         //Checks for existence of user
         const user  = await User.findOne({email});
-        if(!user) return res.status(404).json({ status:"error", message:"User doesn't exists"});
+        if(!user) return res.status(401).json({ status:"error", message:"User doesn't exists"});
 
         //checks password matching
         const isPasswordMatch = helper.matchPassword(password, user.password);
@@ -90,7 +90,7 @@ const refreshTokenVerification = async (req, res) => {
 
         //generates new access token and sends back to client
         const accessToken = await jwtHelper.tokenGenerator(user,"1d");
-        return res.status(200).json({ status:"success", message:"New access token generated", accessToken: accessToken });
+        return res.status(201).json({ status:"success", message:"New access token generated", accessToken: accessToken });
 
     } catch(err){
         console.log(err.message);
