@@ -177,7 +177,7 @@ const createListing = async (req, res) =>{
 
         await list.save();
 
-        res.status(201).json({ status:'success', message: 'Restaurant added successfully'});
+        res.status(201).json({ status:'success', message: 'Restaurant added successfully', restaurantData: list });
 
     }catch(err){
         console.log(err.message);
@@ -190,11 +190,11 @@ const updateListing = async (req, res) =>{
 
         //Checks for list id send as param.
         const listId = req.params.id;
-        if(!listId) return res.status(400).json({ status:'error', message: "List id is null" });
+        if(!listId) return res.status(400).json({ status:'error', message: "List id is not available" });
 
         //checks for data to be updates send as body.
         const data = req.body
-        if(!data) return res.status(400).json({ status:'error', message: "Nothing to update" });
+        if(!data) return res.status(400).json({ status:'error', message: "No data provided to update" });
 
         //updates collection with the data. it will return null if it cant find the document with the id.
         const updatedList = await Listing.findOneAndUpdate({ _id: listId}, data,{ new: true});
@@ -212,7 +212,7 @@ const updateListing = async (req, res) =>{
 const deleteListing  = async (req, res) =>{
     try{
         const listId = req.params.id;
-        if(!listId) return res.status(400).json({ status:'error', message: "List id is null" });
+        if(!listId) return res.status(400).json({ status:'error', message: "List id is not found" });
 
         //Instead of deleting the file here it soft deletes the data.
         const deletedList = await Listing.findOneAndUpdate({_id:listId}, {$set:{isDeleted:true}}, {new: true});
@@ -234,8 +234,8 @@ const deleteImage = async(req, res) => {
         const imageName = req.body.image;
         console.log(imageName);
         //Checking the data for updating is available or not.
-        if(!listId) return res.status(400).json({ status:'error', message: "List id is null" });
-        if(!imageName) return res.status(400).json({ status:'error', message: "Image name is not in req body" });
+        if(!listId) return res.status(400).json({ status:'error', message: "List id is not found" });
+        if(!imageName) return res.status(400).json({ status:'error', message: "Image name is not found" });
 
         //delete image by pull
         const updatedList = await Listing.findOneAndUpdate({ _id: listId}, { $pull:{ images: imageName }}, { new: true });
@@ -269,7 +269,7 @@ const updateImage = async(req, res) =>{
         // If the above update request returns empty then document is not found.
         if(!updatedList) return res.status(404).json({status:"error", message:"document not found."});
 
-        return res.status(200).json({ status:"success", message:"Image successfully deleted."});
+        return res.status(200).json({ status:"success", message:"Image successfully added."});
 
     }catch(err){
         console.log(err.message);
