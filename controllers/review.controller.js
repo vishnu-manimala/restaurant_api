@@ -8,7 +8,7 @@ const listReview = async(req, res) =>{
         console.log(listingId)
         //Retrieving reviews and replays along with the user data
         const reviews = await Review.aggregate([
-            { $match: { listingId: new mongoose.Types.ObjectId(listingId) }},
+            { $match: { _id: new mongoose.Types.ObjectId(listingId) }},
             {
                 $lookup:{
                     from:'users',
@@ -106,8 +106,8 @@ const updateReview = async(req, res) =>{
         const data =  req.body;
         if(!data) return res.status(400).json({ status:'error', message: "Update data is empty" });
 
-        const updatedData = await Review.findOneAndUpdate({ _id: reviewId}, data, { new: true });
-
+        const updatedData = await Review.findOneAndUpdate({ _id: reviewId }, data, { new: true });
+        console.log(updatedData);
         //If above query cant find the review using id then it will return null-checking for that case.
         if(!updatedData)  return res.status(404).json({status:"error", message:"document not found."});
 

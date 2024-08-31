@@ -34,7 +34,7 @@ const register = async( req, res ) =>{
 
     }catch(err){
         console.log(err.message);
-        res.status(500).json({ status:'error', message: ' Internal server error' })
+        res.status(500).json({ status:'error', message: err.message})
     }
 }
 
@@ -47,13 +47,15 @@ const login = async (req, res) => {
         }
 
         const { email, password } = req.body;
+        if(!email || !password) return res.status(400).json({ status:"error", message:"User credentials required"});
 
         //Checks for existence of user
         const user  = await User.findOne({email});
         if(!user) return res.status(401).json({ status:"error", message:"User doesn't exists"});
 
         //checks password matching
-        const isPasswordMatch = helper.matchPassword(password, user.password);
+        const isPasswordMatch = await helper.matchPassword(password, user.password);
+        console.log(isPasswordMatch);
         if(!isPasswordMatch) return res.status(401).json({ status: "error", message: "Invalid username or password" });
 
         //Generating Tokens

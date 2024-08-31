@@ -7,7 +7,7 @@ const roleMiddleware =  require('../middlewares/role.middleware');
 
 reviewRoute.post('/create/:id', authMiddleware.isAuthorized, roleMiddleware.isNotBusinessOwner, reviewController.createReview);
 reviewRoute.get('/review/:id',reviewController.listReview);
-reviewRoute.patch('/update/:id', authMiddleware.isAuthorized, reviewController.updateReview);
+reviewRoute.patch('/update/:id', authMiddleware.isAuthorized, roleMiddleware.isNotBusinessOwner, reviewController.updateReview);
 reviewRoute.delete('/delete/:id', authMiddleware.isAuthorized, roleMiddleware.isNotBusinessOwner, reviewController.deleteReview);
 reviewRoute.post('/addReply/:id', authMiddleware.isAuthorized, reviewController.addReply);
 reviewRoute.delete('/deleteReply/:id', authMiddleware.isAuthorized, reviewController.deleteReview);
